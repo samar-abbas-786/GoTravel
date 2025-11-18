@@ -19,7 +19,7 @@ export const POST = async (request: Request) => {
   const isPassword = await bcrypt.compare(password, user.password);
   if (isPassword === true) {
     return NextResponse.json(
-      { message: "Password Correct", isPassword },
+      { message: "User login successfully", user },
       { status: 200 }
     );
   } else {
