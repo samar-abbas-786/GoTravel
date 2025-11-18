@@ -66,11 +66,10 @@ const TravelDetailShow = () => {
                                                 {option.mode}
                                             </h2>
                                             <div className="flex items-center gap-2 mt-2">
-                                                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                                                    isWithinBudget 
-                                                        ? 'bg-green-100 text-green-700' 
+                                                <span className={`px-3 py-1 rounded-full text-sm font-medium ${isWithinBudget
+                                                        ? 'bg-green-100 text-green-700'
                                                         : 'bg-red-100 text-red-700'
-                                                }`}>
+                                                    }`}>
                                                     {isWithinBudget ? 'Within Budget' : 'Over Budget'}
                                                 </span>
                                                 <span className="text-gray-600">
@@ -163,9 +162,7 @@ const TravelDetailShow = () => {
                                             <button className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors">
                                                 Save Plan
                                             </button>
-                                            <button className="flex-1 bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-colors">
-                                                Book Now
-                                            </button>
+
                                         </div>
                                     </div>
                                 )}
