@@ -13,8 +13,8 @@ const Navbar = () => {
 
             <ul className="hidden md:flex space-x-8 text-gray-700 text-lg font-medium">
                 <a href="/" className="hover:text-lime-600 cursor-pointer transition">Home</a>
-                <a href="#about" className="hover:text-lime-600 cursor-pointer transition">About</a>
-                <a href="/history" className="hover:text-lime-600 cursor-pointer transition">History</a>
+                <a href="/travel/show" className="hover:text-lime-600 cursor-pointer transition">Recent Search</a>
+                <a href="/history" className="hover:text-lime-600 cursor-pointer transition">Saved Plans</a>
                 <a href="#contact" className="hover:text-lime-600 cursor-pointer transition">Contact</a>
             </ul>
 
