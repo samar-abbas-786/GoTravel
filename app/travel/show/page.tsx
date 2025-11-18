@@ -22,8 +22,13 @@ const TravelDetailShow = () => {
 
     if (!data) {
         return (
-            <div className="w-full flex justify-center items-center h-[60vh]">
-                <p className="text-lg text-gray-500">No travel data found</p>
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+                <div className="text-center">
+                    <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span className="text-2xl">🧭</span>
+                    </div>
+                    <p className="text-gray-600">No travel plans found</p>
+                </div>
             </div>
         );
     }
@@ -31,140 +36,144 @@ const TravelDetailShow = () => {
     const travelOptions = data.travel_options;
 
     return (
-        <div className="px-6 md:px-16 py-10">
+        <div className="min-h-screen bg-gray-50 p-4">
+            <div className="max-w-4xl mx-auto">
+                {/* Header */}
+                <div className="text-center mb-8">
+                    <h1 className="text-3xl font-bold text-gray-800 mb-2">Your Travel Plans</h1>
+                    <p className="text-gray-600">Choose from your personalized options</p>
+                </div>
 
-            <h1 className="text-3xl font-bold text-lime-700 mb-8 tracking-tight">
-                Travel Plan Options
-            </h1>
+                {/* Travel Options */}
+                <div className="space-y-4">
+                    {travelOptions.map((option: any, idx: number) => {
+                        const isOpen = openIndex === idx;
+                        const isWithinBudget = option.budget_match === "within budget";
 
-            <div className="space-y-5">
-                {travelOptions.map((option: any, idx: number) => {
-                    const isOpen = openIndex === idx;
-
-                    return (
-                        <div
-                            key={idx}
-                            className="bg-white rounded-2xl shadow-md border border-lime-100"
-                        >
-                            {/* HEADER CARD */}
+                        return (
                             <div
-                                onClick={() =>
-                                    setOpenIndex(isOpen ? null : idx)
-                                }
-                                className="px-6 py-4 flex justify-between items-center cursor-pointer hover:bg-lime-50 rounded-2xl transition"
+                                key={idx}
+                                className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden"
                             >
-                                <div>
-                                    <h2 className="text-xl font-semibold text-lime-700">
-                                        {option.mode}
-                                    </h2>
-                                    <p className="text-gray-600 text-sm">
-                                        Estimated cost: ₹{option.total_estimated_cost}
-                                    </p>
+                                {/* Header */}
+                                <div
+                                    onClick={() => setOpenIndex(isOpen ? null : idx)}
+                                    className="p-6 cursor-pointer hover:bg-gray-50 transition-colors"
+                                >
+                                    <div className="flex justify-between items-center">
+                                        <div>
+                                            <h2 className="text-xl font-semibold text-gray-800">
+                                                {option.mode}
+                                            </h2>
+                                            <div className="flex items-center gap-2 mt-2">
+                                                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                                    isWithinBudget 
+                                                        ? 'bg-green-100 text-green-700' 
+                                                        : 'bg-red-100 text-red-700'
+                                                }`}>
+                                                    {isWithinBudget ? 'Within Budget' : 'Over Budget'}
+                                                </span>
+                                                <span className="text-gray-600">
+                                                    ₹{option.total_estimated_cost}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <span className="text-gray-500 text-lg">
+                                            {isOpen ? "▲" : "▼"}
+                                        </span>
+                                    </div>
                                 </div>
 
-                                <span className="text-lime-700 text-lg">
-                                    {isOpen ? "▲" : "▼"}
-                                </span>
-                            </div>
+                                {/* Details */}
+                                {isOpen && (
+                                    <div className="p-6 border-t border-gray-200 space-y-6">
+                                        {/* Cost Summary */}
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="text-center p-3 bg-blue-50 rounded-lg">
+                                                <p className="text-sm text-gray-600">Travel Cost</p>
+                                                <p className="text-lg font-semibold text-blue-700">₹{option.travel_cost}</p>
+                                            </div>
+                                            <div className="text-center p-3 bg-green-50 rounded-lg">
+                                                <p className="text-sm text-gray-600">Total Cost</p>
+                                                <p className="text-lg font-semibold text-green-700">₹{option.total_estimated_cost}</p>
+                                            </div>
+                                        </div>
 
-                            {/* COLLAPSIBLE DETAILS */}
-                            {isOpen && (
-                                <div className="px-6 pb-6 space-y-4 text-[15px]">
+                                        {/* Places */}
+                                        <div>
+                                            <h3 className="text-lg font-semibold text-gray-800 mb-3">Places to Visit</h3>
+                                            <div className="space-y-2">
+                                                {option.places_to_visit.map((place: any, i: number) => (
+                                                    <div key={i} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                                        <div>
+                                                            <p className="font-medium text-gray-800">{place.name}</p>
+                                                            <p className="text-sm text-gray-600">{place.description}</p>
+                                                        </div>
+                                                        <span className="text-gray-700">₹{place.entry_fee}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
 
-                                    {/* Travel Cost */}
-                                    <p className="text-gray-700">
-                                        <b>Travel Cost:</b> ₹{option.travel_cost}
-                                    </p>
+                                        {/* Hotels */}
+                                        <div>
+                                            <h3 className="text-lg font-semibold text-gray-800 mb-3">Hotels</h3>
+                                            <div className="space-y-2">
+                                                {option.hotels.map((hotel: any, i: number) => (
+                                                    <div key={i} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                                        <p className="font-medium text-gray-800">{hotel.name}</p>
+                                                        <span className="text-gray-700">₹{hotel.price_per_night}/night</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
 
-                                    {/* Places */}
-                                    <div>
-                                        <h3 className="text-lg font-semibold text-gray-800">
-                                            Places to Visit
-                                        </h3>
-                                        <ul className="list-disc ml-6 mt-2 space-y-1">
-                                            {option.places_to_visit.map((p: any, i: number) => (
-                                                <li key={i}>
-                                                    <b>{p.name}</b> — ₹{p.entry_fee}
-                                                    <p className="text-gray-600 text-sm">
-                                                        {p.description}
-                                                    </p>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
+                                        {/* Food */}
+                                        <div>
+                                            <h3 className="text-lg font-semibold text-gray-800 mb-3">Food Options</h3>
+                                            <div className="space-y-2">
+                                                {option.food_options.map((food: any, i: number) => (
+                                                    <div key={i} className="flex justify-between items-center p-2 bg-gray-50 rounded">
+                                                        <p className="font-medium text-gray-800">{food.type}</p>
+                                                        <span className="text-gray-700">₹{food.average_cost}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
 
-                                    {/* Hotels */}
-                                    <div>
-                                        <h3 className="text-lg font-semibold text-gray-800">
-                                            Hotels
-                                        </h3>
-                                        <ul className="list-disc ml-6 mt-2 space-y-1">
-                                            {option.hotels.map((h: any, i: number) => (
-                                                <li key={i}>
-                                                    <b>{h.name}</b> — ₹{h.price_per_night}/night
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
+                                        {/* Itinerary */}
+                                        <div>
+                                            <h3 className="text-lg font-semibold text-gray-800 mb-3">Daily Plan</h3>
+                                            <div className="space-y-3">
+                                                {option.itinerary.map((plan: any, i: number) => (
+                                                    <div key={i} className="p-3 bg-gray-50 rounded-lg">
+                                                        <h4 className="font-semibold text-gray-800 mb-2">Day {plan.day}</h4>
+                                                        <ul className="space-y-1">
+                                                            {plan.activities.map((activity: string, j: number) => (
+                                                                <li key={j} className="text-sm text-gray-700">• {activity}</li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
 
-                                    {/* Food */}
-                                    <div>
-                                        <h3 className="text-lg font-semibold text-gray-800">
-                                            Food Options
-                                        </h3>
-                                        <ul className="list-disc ml-6 mt-2 space-y-1">
-                                            {option.food_options.map((f: any, i: number) => (
-                                                <li key={i}>
-                                                    {f.type} — ₹{f.average_cost}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-
-                                    {/* Itinerary */}
-                                    <div>
-                                        <h3 className="text-lg font-semibold text-gray-800">
-                                            Itinerary
-                                        </h3>
-                                        <div className="ml-6 mt-2 space-y-3">
-                                            {option.itinerary.map((plan: any, i: number) => (
-                                                <div
-                                                    key={i}
-                                                    className="bg-gray-50 border border-gray-200 p-4 rounded-xl"
-                                                >
-                                                    <b className="text-lime-700 text-[15px]">
-                                                        Day {plan.day}
-                                                    </b>
-                                                    <ul className="list-disc ml-6 mt-1 text-[14px]">
-                                                        {plan.activities.map((a: any, j: number) => (
-                                                            <li key={j}>{a}</li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
-                                            ))}
+                                        {/* Action Buttons */}
+                                        <div className="flex gap-3 pt-4">
+                                            <button className="flex-1 bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors">
+                                                Save Plan
+                                            </button>
+                                            <button className="flex-1 bg-green-500 text-white py-2 px-4 rounded-lg hover:bg-green-600 transition-colors">
+                                                Book Now
+                                            </button>
                                         </div>
                                     </div>
-
-                                    {/* Summary */}
-                                    <p className="text-[16px] font-semibold text-gray-800">
-                                        Total Estimated Cost: ₹{option.total_estimated_cost}
-                                    </p>
-
-                                    <p
-                                        className={`font-semibold ${option.budget_match === "within budget"
-                                                ? "text-green-600"
-                                                : "text-red-600"
-                                            }`}
-                                    >
-                                        Budget: {option.budget_match}
-                                    </p>
-                                </div>
-                            )}
-                        </div>
-                    );
-                })}
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
             </div>
-
         </div>
     );
 };
