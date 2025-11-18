@@ -1,6 +1,5 @@
 import About from "@/components/about"
 import Hero_Section from "@/components/hero"
-import Navbar from "@/components/navbar"
 function Home() {
   return (
     // <div>Home</div>
