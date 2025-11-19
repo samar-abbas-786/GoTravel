@@ -15,9 +15,9 @@ function About() {
                 </div>
 
                 <div className="text-gray-800">
-                    <h1 className="text-4xl font-bold mb-4 text-lime-600 font-mono">About GoTravel</h1>
+                    <h1 className="text-4xl font-bold mb-4 text-gray-800 font-mono"><span className="text-lime-600">About</span> Savvy </h1>
                     <p className="text-lg leading-relaxed mb-4">
-                        GoTravel is a simple and smart travel planning tool. Just enter your
+                        Savvy is a simple and smart travel planning tool. Just enter your
                         destination and your budget, and our AI will suggest the best places
                         you can visit within that budget.
                     </p>

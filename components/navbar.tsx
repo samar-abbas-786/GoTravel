@@ -18,7 +18,7 @@ const Navbar = () => {
                         <div className="absolute -inset-2 bg-lime-100 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
                     </div>
                     <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
-                        Go<span className="text-lime-600">Travel</span>
+                        <span className="text-gray-700">Savvy</span>
                     </h1>
                 </a>
 

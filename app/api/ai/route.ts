@@ -6,6 +6,7 @@ const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 export const POST = async (request: Request) => {
   try {
     const { source, destination, budget } = await request.json();
+    console.log(source, destination, budget);
 
     if (!source || !destination || !budget) {
       return NextResponse.json({ message: "Missing fields" }, { status: 400 });
@@ -76,7 +77,7 @@ RULES:
     const model = ai.getGenerativeModel({ model: "gemini-2.5-flash" });
     const result = await model.generateContent(prompt);
     let raw = result.response.text().trim();
-
+    console.log("raw", raw);
     // Remove potential markdown
     raw = raw
       .replace(/```json/g, "")
