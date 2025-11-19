@@ -1,3 +1,5 @@
+```mermaid
+
 flowchart TD
 
 %% ============ USER ENTRY ============
@@ -52,3 +54,5 @@ T6 --> T7[Return Success]
 M4 --> V1[User Opens Saved Trips Page]
 V1 --> V2[Fetch Saved Plans from MongoDB]
 V2 --> V3[Display Saved Plans]
+```
+
