@@ -1,88 +1,100 @@
-flowchart TD
-  %% Client / Browser (React / Next app)
-  subgraph CLIENT["Client (Next.js App - React / TS)"]
-    direction TB
-    C_Home["Home (app/page.tsx)"]
-    C_Login["Login Page<br/>(app/login/page.tsx)"]
-    C_Signup["Signup Page<br/>(app/Signup/page.tsx)"]
-    C_TravelForm["Travel Search Page<br/>(app/travel/page.tsx)"]
-    C_TravelShow["Travel Results Page<br/>(app/travel/show/page.tsx)"]
-    C_History["History Page<br/>(/history)"]
-    C_AuthContext["AuthProvider / AuthContext<br/>(context/authContext.tsx)"]
-    C_LocalStorage["localStorage (user, travel_data)"]
-    C_Axios["API Layer (axios)"]
-  end
+flowchart TB
 
-  %% Server (Next API routes + middleware)
-  subgraph SERVER["Server (Next.js app router API)"]
-    direction TB
-    S_Middleware["middleware.ts<br/>Matches: /history, /travel/:path*<br/>Reads cookie 'token' and jwtVerify via jose"]
-    S_API_Login["POST /api/login<br/>(app/api/login/route.ts)"]
-    S_API_Signup["POST /api/signup<br/>(app/api/signup/route.ts)"]
-    S_API_AI["POST /api/ai<br/>(app/api/ai/route.ts)"]
-    S_API_History["GET /api/history (or /history page data)"]
-    S_DB["Database (users, history)"]
-    S_Gemini["Google Generative AI (Gemini API)"]
-    S_JWT["JWT secret (process.env.JWT_SECRET_KEY)"]
-  end
+%% ===========================
+%% MAIN SECTIONS
+%% ===========================
+subgraph CLIENT["Client (React/Next.js, TypeScript)"]
+direction TB
+C_Pages["Pages: Home, Login, Signup, TravelSearch, History, Profile"]
+C_AuthContext["AuthContext (stores accessToken in memory)"]
+C_API["API Layer (fetch/axios wrapper)"]
+C_Access["Access Token (Memory only)"]
+C_Refresh["Refresh Token (HttpOnly Cookie — set by server)"]
+end
 
-  %% Client startup and context
-  C_Home --> C_AuthContext
-  C_AuthContext -->|on mount: read localStorage.user| C_LocalStorage
-  C_LocalStorage --> C_AuthContext
+subgraph SERVER["Server (Node.js / Express / Next API Routes)"]
+direction TB
+S_Auth["Auth Controller (/auth/signup, /auth/login, /auth/refresh, /auth/logout)"]
+S_AI["AI Controller (/ai/search)"]
+S_History["History Controller (/history)"]
+S_Middleware["Auth Middleware (verify access token from Authorization header)"]
+S_Token["Token Service (sign/verify access & refresh tokens)"]
+S_DB["Database (users, search_history)"]
+S_AI_Service["AI Service (Gemini / External AI API)"]
+end
 
-  %% Signup flow
-  C_Signup -->|POST /api/signup {name,email,password}| C_Axios
-  C_Axios --> S_API_Signup
-  S_API_Signup -->|validate, hash pw, create user| S_DB
-  S_API_Signup -->|response 201 + user (may set cookie)| C_Axios
-  C_Axios -->|store user| C_LocalStorage
-  C_LocalStorage --> C_AuthContext
-  C_AuthContext -->|redirect| C_Login
+%% ===========================
+%% AUTH FLOWS
+%% ===========================
 
-  %% Login flow (server sets cookie 'token')
-  C_Login -->|POST /api/login {email,password}| C_Axios
-  C_Axios --> S_API_Login
-  S_API_Login -->|find user, bcrypt.compare| S_DB
-  S_API_Login -->|if ok: jwt.sign({id}) expiresIn:7d| S_JWT
-  S_API_Login -->|set cookie 'token' httpOnly, path=/, maxAge:7d| C_Axios
-  S_API_Login -->|return 200 + user (body)| C_Axios
-  C_Axios -->|localStorage.setItem('user', user)| C_LocalStorage
-  C_LocalStorage --> C_AuthContext
-  C_AuthContext -->|client redirect| C_TravelForm
+%% SIGNUP
+C_Pages -->|Submit Signup Form| C_API
+C_API -->|POST /auth/signup| S_Auth
+S_Auth -->|Validate + Hash Password| S_DB
+S_Auth -->|Sign access & refresh tokens| S_Token
+S_Auth -->|Set HttpOnly Refresh Cookie + Return accessToken| C_API
+C_API -->|Store accessToken in memory| C_AuthContext
+C_AuthContext -->|Navigate| C_Pages
 
-  %% Protected route middleware (server-side)
-  C_TravelForm -->|POST /api/ai {source,destination,budget}| C_Axios
-  C_Axios --> S_API_AI
-  S_Middleware -.->|applies to /travel/:path* and /history| S_API_AI
-  S_Middleware -->|reads cookie 'token'| S_JWT
-  S_JWT -->|jwtVerify(token, secret)| S_Middleware
-  S_Middleware -->|if invalid or missing -> redirect /login (NextResponse.redirect)| C_Login
+%% LOGIN
+C_Pages -->|Submit Login Form| C_API
+C_API -->|POST /auth/login| S_Auth
+S_Auth -->|Verify Password| S_DB
+S_Auth -->|Generate Tokens| S_Token
+S_Auth -->|Set HttpOnly Refresh Cookie + Return accessToken| C_API
+C_API -->|Store accessToken in memory| C_AuthContext
 
-  %% AI search flow (protected by middleware)
-  S_API_AI -->|validate body fields (source,destination,budget)| S_API_AI
-  S_API_AI -->|construct prompt + call Gemini| S_Gemini
-  S_Gemini -->|returns text| S_API_AI
-  S_API_AI -->|strip markdown, parse JSON -> if parse error -> 500| C_Axios
-  S_API_AI -->|200 { travel: parsed }| C_Axios
-  C_Axios -->|localStorage.setItem('travel_data', travel)| C_LocalStorage
-  C_LocalStorage --> C_TravelShow
-  C_TravelShow -->|reads localStorage.travel_data on mount| C_LocalStorage
+%% TOKEN REFRESH
+C_API -->|401 Detected| C_AuthContext
+C_AuthContext -->|POST /auth/refresh (cookie sent automatically)| S_Auth
+S_Auth -->|Validate Refresh Token| S_Token
+S_Auth -->|Rotate Token + Return New AccessToken| C_API
+C_API -->|Update accessToken in memory| C_AuthContext
+C_AuthContext -->|Retry failed request| C_API
 
-  %% History (protected)
-  C_History -->|GET /history| C_Axios
-  C_Axios --> S_API_History
-  S_Middleware --> S_API_History
-  S_API_History -->|query S_DB for user's saved searches| S_DB
-  S_DB -->|return saved searches| S_API_History
-  S_API_History -->|200 + history| C_Axios
-  C_Axios --> C_History
+%% LOGOUT
+C_Pages -->|Logout button| C_API
+C_API -->|POST /auth/logout| S_Auth
+S_Auth -->|Invalidate refresh token + Clear cookie| S_Token
+C_AuthContext -->|Clear accessToken| C_Pages
 
-  %% Error & redirect flows
-  S_JWT -.->|missing/invalid| S_Middleware
-  S_Middleware -->|redirect to /login| C_Login
-  S_API_AI -.->|AI parse failure| C_Axios
-  C_Axios -->|client: show error toast / keep user on TravelForm| C_TravelForm
+%% ===========================
+%% PROTECTED ROUTES
+%% ===========================
 
-  style CLIENT fill:#f7fff7,stroke:#2f855a
-  style SERVER fill:#f0f9ff,stroke:#2b6cb0
+%% TRAVEL SEARCH
+C_Pages -->|Open /travel| C_AuthContext
+C_AuthContext -->|Check accessToken| C_Pages
+C_Pages -->|POST /ai/search with Authorization: Bearer token| C_API
+C_API --> S_Middleware
+S_Middleware -->|Verify accessToken| S_Token
+S_Middleware -->|If valid| S_AI
+S_AI -->|Call AI Service| S_AI_Service
+S_AI_Service -->|AI Suggestions| S_AI
+S_AI -->|Save to History| S_DB
+S_AI -->|Return Suggestions| C_API
+C_API -->|Display Results| C_Pages
+
+%% HISTORY
+C_Pages -->|GET /history (Bearer token)| C_API
+C_API --> S_Middleware
+S_Middleware -->|Verify accessToken| S_Token
+S_Middleware --> S_History
+S_History -->|Fetch user history| S_DB
+S_History -->|Return history[]| C_API
+C_API --> C_Pages
+
+%% ===========================
+%% ERROR & SECURITY FLOWS
+%% ===========================
+S_Middleware -.->|Invalid/Expired Access Token| C_API
+C_API -.->|Trigger refresh flow| C_AuthContext
+S_Auth -.->|Invalid Refresh Token| C_API
+C_API -.->|Force Logout| C_Pages
+
+%% STYLING
+classDef client fill:#e6fffa,stroke:#1d7874,stroke-width:1px;
+classDef server fill:#eef2ff,stroke:#4338ca,stroke-width:1px;
+
+class CLIENT client
+class SERVER server
