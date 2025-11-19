@@ -2,6 +2,8 @@ import User from "@/models/userSchem";
 import db from "@/utils/databse";
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
+import jwt from "jsonwebtoken";
+import { cookies } from "next/headers";
 
 export const POST = async (request: Request) => {
   await db();
@@ -18,6 +20,15 @@ export const POST = async (request: Request) => {
   }
   const isPassword = await bcrypt.compare(password, user.password);
   if (isPassword === true) {
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET_KEY!, {
+      expiresIn: "7d",
+    });
+    (await cookies()).set("token", token, {
+      httpOnly: true,
+      path: "/",
+      maxAge: 60 * 60 * 24 * 7,
+    });
+
     return NextResponse.json(
       { message: "User login successfully", user },
       { status: 200 }

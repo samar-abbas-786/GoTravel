@@ -1,10 +1,12 @@
 'use client'
 import { LuBus } from "react-icons/lu";
 import { useState } from "react";
-
+import { useAuth } from "@/context/authContext";
+import { useRouter } from "next/navigation";
 const Navbar = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-
+    const route = useRouter()
+    const { user } = useAuth()
     return (
         <>
             <nav className="w-full h-20 bg-white/90 backdrop-blur-lg border-b border-gray-100 flex justify-between items-center px-6 md:px-12 sticky top-0 z-50">
@@ -49,9 +51,13 @@ const Navbar = () => {
                 </ul>
 
                 {/* Desktop CTA Button */}
-                <button className="hidden md:block bg-gradient-to-r from-lime-500 to-lime-600 text-white px-6 py-2.5 rounded-full font-medium hover:from-lime-600 hover:to-lime-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105">
-                    Explore Now
-                </button>
+                {user ?
+                    <button onClick={() => route.push("/travel")} className="hidden md:block bg-gradient-to-r from-lime-500 to-lime-600 text-white px-6 py-2.5 rounded-full font-medium hover:from-lime-600 hover:to-lime-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105">
+                        Explore Now
+                    </button> :
+                    <button onClick={() => route.push("/Signup")} className="hidden md:block bg-gradient-to-r from-lime-500 to-lime-600 text-white px-6 py-2.5 rounded-full font-medium hover:from-lime-600 hover:to-lime-700 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105">
+                        Sign Up
+                    </button>}
 
                 {/* Mobile Menu Button */}
                 <button
@@ -96,9 +102,14 @@ const Navbar = () => {
                     >
                         Contact
                     </a>
-                    <button className="w-full bg-gradient-to-r from-lime-500 to-lime-600 text-white py-3 rounded-lg font-medium hover:from-lime-600 hover:to-lime-700 transition-all duration-300 shadow-lg mt-4">
-                        Explore Now
-                    </button>
+                    {user ?
+                        <button onClick={() => route.push("/travel")} className="w-full bg-gradient-to-r from-lime-500 to-lime-600 text-white py-3 rounded-lg font-medium hover:from-lime-600 hover:to-lime-700 transition-all duration-300 shadow-lg mt-4">
+                            Explore Now
+                        </button> :
+                        <button onClick={() => route.push("/Signup")} className="w-full bg-gradient-to-r from-lime-500 to-lime-600 text-white py-3 rounded-lg font-medium hover:from-lime-600 hover:to-lime-700 transition-all duration-300 shadow-lg mt-4">
+                            SignUp
+                        </button>
+                    }
                 </div>
             </div>
 
